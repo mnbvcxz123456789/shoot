@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>坦克打泡泡</title>
+	<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+	<div class="container">
+		<div class="header level">level:<span id="level"></span></div>
+		<div class="header time">time:<span id="time"></span>s</div>
+		<div class="header">
+			<div class="goal">goal:<span id="goal"></span></div>
+			<div class="score">score:<span id="score"></span></div>
+		</div>
+		<canvas id="canvas" height="590px" width="480px">
+			您的浏览器不支持html5！
+		</canvas>
+		<div class="result success">Congratulations,you success!</div>
+		<div class="result fail">
+			<span>Sorry,you failed!</span><br>
+			<a href="javascript:void(0)" class="again" onclick="refresh()">try again</a>
+		</div>
+		<div class="tips">
+			<ul>
+				<li>
+					<div class="help">
+						<h2>游戏帮助</h2>
+						<p>游戏规则：</p>
+						<p>点击即可发射子弹，在60s内成功获得20000分即为挑战成功，若倒计时结束，未达到20000分，很遗憾，挑战失败。</p>
+						<p>注意：</p>
+						<p>
+							1,请在游戏区域内进行游戏（即网页中蓝色界面内）。<br>
+							2,为了更好的进行游戏，请使用google浏览器，其他浏览器暂时还没有试过。<br>
+							3,有好的建议欢迎一起探讨。<span style="display:none;">QQ：962058273</span>
+						</p>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+</body>
+<script src="lib/jquery-1.10.1.min.js"></script>
+<script src="js/game.js"></script>
+<script>
+	function refresh(){
+		 location.reload();
+	}
+</script>
+</html>

@@ -1,0 +1,133 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+.container {
+	border: 2px #000 solid;
+	background:rgb(135,206,250);
+	margin: 0px auto;
+	width: 480px;
+	height: 640px;
+}
+.container .header {
+	font-family: 'Eater', cursive;
+	float: left;
+	font-size: 18px;
+}    
+.container .header:nth-of-type(3) {
+	float: right;
+}
+.container .header:nth-of-type(2) {
+	margin-left: 35%;
+}
+.container .header:last-of-type {
+	float: right;
+}
+.container .result {
+	width: 350px;
+	padding: 30px 0px;
+	text-align: center;
+	font-family: 'Eater', cursive;
+	font-size: 18px;
+	border: 1px black solid;
+	position: relative;
+    top: -70%;
+    left: 15%;
+    border-radius: 2px;
+	display: none;
+}
+.container .result.success {
+	background-color: #87CEEB;
+}
+.container .result.fail {
+	background-color: #FFC0CB;
+}
+.container .result .again {
+	text-decoration: none;
+    width: 100px;
+    height: 35px;
+    line-height: 35px;
+    background-color: #DC143C;
+    color: white;
+    display: inline-block;
+    border-radius: 2px;
+    margin-top: 15px;
+    font-family: 'Eater', cursive;
+}
+
+.tips {
+	position: absolute;
+    top: 20px;
+    left: 10px;
+}
+
+.tips ul p {
+	font-family: 'Mr Bedfort', cursive;
+	font-size:100%;
+}
+.tips ul h2 {
+	font-family: 'Eater', cursive;
+	font-size: 140%;
+	font-weight:bold;
+	text-align: center;
+}
+.tips ul,li {
+	list-style: none;
+}
+.tips ul {
+	padding: 3em;
+	font-size: 0;
+}
+.tips ul li {
+	display: inline-block;
+	*display: inline;
+	zoom: 1;
+	margin: 1em 1em 3em;
+	font-size: 16px;
+}
+.tips ul div {
+	box-shadow: 5px 5px 7px rgb(33,33,33,0.7);
+	-webkit-box-shadow: 5px 5px 7px rgb(33,33,33,0.7);
+	-moz-box-shadow: 5px 5px 7px rgb(33,33,33,0.7);
+	transform: rotate(-6deg);
+	-webkit-transform: rotate(-6deg);
+	-moz-transform: rotate(-6deg);
+	-o-transform: rotate(-6deg);
+	-ms-transform: rotate(-6deg);
+	transition: transform .15s linear;
+	-webkit-transition: -webkit-transform .15s linear;
+	-moz-transition: -moz-transform .15s linear;
+	-o-transition: -o-transform .15s linear;
+	-ms-transition: -ms-transform .15s linear;
+	position: relative;
+	display: inline-block;
+	height: 300px;
+	width: 300px;
+	font-size: 100%;
+	color: #000;
+	background-color: #ffc;
+	padding: 1em;
+}
+.tips ul div:before {
+	content:'';
+	position:absolute;
+	top:-20px; 
+	left: 30%;
+	width: 110px;
+	height: 40px;
+	background-color:rgba(255, 255, 204,0.5);			
+	border-left: 1px dashed rgba(0, 0, 0, 0.1);
+	border-right: 1px dashed rgba(0, 0, 0, 0.1);
+	-webkit-box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
+	-moz-box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
+	box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
+}
+.tips ul li div {
+	position:relative;
+	top:5px;
+	background-color: #ccf;
+}
+.tips ul li div:before {
+	background-color:  rgba(204, 204, 255,0.5);
+}
+
