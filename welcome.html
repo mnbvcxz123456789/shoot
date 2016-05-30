@@ -1,0 +1,291 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+    body {
+            background: black;
+            width: 100%;
+            height: 100%;
+        }
+        #cas{
+            display: inline-block;
+            margin:auto;
+        }
+
+    </style>
+    <title>welcome</title>
+</head>
+<body>
+    <div >
+        <canvas id='canvas'>你的浏览器不支持canvas</canvas>
+   </div>
+    <script>
+    window.onload = function(){
+        var canvas,
+            context,
+            interval,
+            focallength = 250,
+            pause = false,
+            mouseX = null,
+            mouseY = null,
+            mouseRadius = 50,
+            dots = [];
+        var c = {
+            init: function(){
+                var showInfo = ['welcome','lena.yang','Web Front-end engineer',''];
+                c.Drawing.init("canvas");
+                c.shape.init(showInfo);
+                /*c.Drawing.testMove();*/
+                c.Drawing.loop();
+            }
+        };
+        c.Drawing = (function(){
+            var requestFrame = function(callback) {
+                                       window.setTimeout(callback, 100);
+                                     };
+            return {
+                init: function(el){
+                    canvas = document.getElementById(el);
+                    context = canvas.getContext("2d");
+                    this.adjustCanvas();
+                    window.addEventListener("resize",function(e){
+                        c.Drawing.adjustCanvas();
+                    });
+                },
+                /*自适应屏幕*/
+                adjustCanvas: function(){
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                },
+                clearFrame: function(){
+                    context.clearRect(0,0,canvas.width , canvas.height);
+                },
+                loop: function(){
+                    this.clearFrame();
+                    dots.forEach(function(){
+                        this.update();
+                    });
+                    requestFrame.call(window,this.loop.bind(this));
+                },
+                /*画圆*/
+                drawCircle: function(dot){
+                    context.save();
+                    context.beginPath();
+                    var scale = focallength/(focallength + dot.z);
+                    context.arc(canvas.width/2 + (dot.x-canvas.width/2)*scale , canvas.height/2 + (dot.y-canvas.height/2) * scale, dot.radius , 0 , 2*Math.PI);
+                    context.fillStyle = "rgba(255,255,255,"+ scale +")";
+                    context.fill()
+                    context.restore();
+                },
+               /* 文字格式*/
+                drawingText: function(text){
+                    context.save()
+                    context.font = "150px 微软雅黑 bold";
+                    context.fillStyle = "rgba(255,255,255,1)";
+                    context.textAlign = "center";
+                    context.textBaseline = "middle";
+                    context.fillText(text , canvas.width/2 , canvas.height/2);
+                    context.restore();
+                }
+            }
+        }());
+         Array.prototype.forEach = function(callback){
+            for(var i=0;i<this.length;i++){
+                callback.call(this[i]);
+            }
+        }
+
+        c.Dot = function(centerX , centerY , centerZ , radius){
+            this.dx = centerX;   /*保存原来的位置*/
+            this.dy = centerY;
+            this.dz = centerZ;
+            this.tx = 0;          /*保存粒子分散后又聚合的位置*/
+            this.ty = 0;
+            this.tz = 0;
+            this.z = centerZ;
+            this.x = centerX;
+            this.y = centerY;
+            this.radius = radius;
+            this.stop = true;
+
+            this.recordX = null;
+            this.recordY = null;
+        }
+        c.Dot.prototype = {
+            /*画圆点*/
+          paint: function(){
+                c.Drawing.drawCircle(this);
+           },
+           update: function(){
+                /*this.z = Math.random()*focallength*2 - focallength;*/
+                if(this.stop){
+                    this.x = this.x + (Math.random() * 50) - 25;
+                    this.y = this.y + (Math.random() * 50) - 25;
+                }else{
+                    this.x -= Math.sin(Math.random() * 3.142);
+                    this.y -= Math.sin(Math.random() * 3.142);
+                }
+                this.paint();
+                this.checkMouse();
+           },
+           checkMouse: function(){
+                if(!mouseX){
+                    if(this.recordX){
+                        this.stop = false;
+                        this.dx = this.recordX;
+                        this.dy = this.recordY;
+                        this.reecoedX = null;
+                        this.recordY = null;
+                    }
+                    return;
+                }
+                var distance = Math.sqrt(Math.pow(mouseX - this.x, 2) + Math.pow(mouseY - this.y, 2));
+                var angle = Math.atan((mouseY - this.y) / (mouseX - this.x));
+                if(distance < mouseRadius){
+                    this.stop = false;
+                    if(!this.recordX){
+                        this.recordX = this.dx;
+                        this.recordY = this.dy;
+                    }
+                    var xc = Math.abs((mouseRadius - distance) * Math.cos(angle));
+                    var yc = Math.abs((mouseRadius - distance) * Math.sin(angle));
+                    xc = mouseX > this.x ? -xc : xc;
+                    yc = mouseY > this.y ? -yc : yc;
+                    this.dx = this.x + xc;
+                    this.dy = this.y + yc;
+                }else{
+                    if(this.recordX){
+                        this.false = false;
+                        this.dx = this.recordX;
+                        this.dy = this.recordY;
+                        this.recordX = null;
+                        this.recordY = null;
+                    }
+                }
+           }
+        }
+         /*得到圆点*/
+        function getDots(text){
+            dots = [];
+            c.Drawing.drawingText(text);
+            var imgData = context.getImageData(0,0,canvas.width , canvas.height);
+            context.clearRect(0,0,canvas.width , canvas.height);
+            for(var x=0;x<imgData.width;x+=5){
+                for(var y=0;y<imgData.height;y+=5){
+                    var i = (y*imgData.width + x)*4;
+                    if(imgData.data[i+3] >= 128){
+                        var dot = new c.Dot(x-3 , y-3 , 0 , 3);
+                        dots.push(dot);
+                    }
+                }
+            }
+            return dots;
+        }
+        /*鼠标移动*/
+        window.onmousemove = function(e){
+            if(e.target.tagName == 'CANVAS'){
+                mouseX = e.clientX - e.target.getBoundingClientRect().left;
+                mouseY = e.clientY - e.target.getBoundingClientRect().top;
+            }else{
+                mouseX = null;
+                mouseY = null;
+            }
+        }
+        c.shape = (function(){
+            var lastTime,
+                derection = true;
+               /* dots = [];*/
+            return {
+                init: function(showInfo){
+                    dots = getDots(showInfo.shift());
+                    this.initAnimate();
+                    interval = setInterval(function(){
+                        var current = showInfo.shift();
+                        switch(current){
+                            case 'welcome':
+                                dots = getDots(current);
+                                c.shape.initAnimate(); 
+                                break;
+                            case '':
+                                clearInterval(interval);
+                                break;
+                            default:
+                                dots = [];
+                                c.Drawing.clearFrame();
+                                dots = getDots(current);
+                                c.shape.initAnimate(showInfo);
+                                break;
+                        }
+                    },2000);
+                },
+                /*初始化动画*/
+                initAnimate: function(showInfo){
+                    dots.forEach(function(){
+                        this.x = Math.random()*canvas.width;
+                        this.y = Math.random()*canvas.height;
+                        this.z = Math.random()*focallength*2 - focallength;
+                        this.tx = Math.random()*canvas.width;
+                        this.ty = Math.random()*canvas.height;
+                        this.tz = Math.random()*focallength*2 - focallength;
+                        this.paint();
+                    });
+                    this.animate(showInfo);
+                },
+                /*动画*/
+                animate: function(showInfo){
+                    var thisTime = +new Date();
+                    c.Drawing.clearFrame();
+                    dots.forEach(function(){
+                        var dot = this;
+                        if(derection){
+                            if (Math.abs(dot.dx - dot.x) < 0.1 && Math.abs(dot.dy - dot.y) < 0.1 && Math.abs(dot.dz - dot.z)<0.1) {
+                                dot.x = dot.dx;
+                                dot.y = dot.dy;
+                                dot.z = dot.dz;
+                                if(thisTime - lastTime > 1500) derection = false;
+                                dot.stop = false;
+                            } else {
+                                dot.x = dot.x + (dot.dx - dot.x) * 0.1;
+                                dot.y = dot.y + (dot.dy - dot.y) * 0.1;
+                                dot.z = dot.z + (dot.dz - dot.z) * 0.1;
+                                lastTime = +new Date();
+                                dot.stop = false;
+                            }
+                        }
+                        else {
+                            if (Math.abs(dot.tx - dot.x) < 0.1 && Math.abs(dot.ty - dot.y) < 0.1 && Math.abs(dot.tz - dot.z)<0.1) {
+                                dot.x = dot.tx;
+                                dot.y = dot.ty;
+                                dot.z = dot.tz;
+                                dot.stop = true;
+                                if(typeof showInfo != 'object' || showInfo.length == 0){
+                                    pause = true;
+                                }else{
+                                    derection = true;
+                                }
+                            }
+                        }
+                          dot.paint();
+                    });
+                    if(!pause) {
+                        if("requestAnimationFrame" in window){
+                            requestAnimationFrame(c.shape.animate);
+                        }
+                        else if("webkitRequestAnimationFrame" in window){
+                            webkitRequestAnimationFrame(c.shape.animate);
+                        }
+                        else if("msRequestAnimationFrame" in window){
+                            msRequestAnimationFrame(c.shape.animate);
+                        }
+                        else if("mozRequestAnimationFrame" in window){
+                            mozRequestAnimationFrame(c.shape.animate);
+                        }
+                    }
+                }
+            }
+        }()); 
+        c.init();
+    }
+    </script>
+</body>
+</html>
