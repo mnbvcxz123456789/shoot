@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>轮播</title>
+</head>
+<style type="text/css">
+	.player {
+		width: 215px;
+	}
+	.player .box {
+		width: 215px;
+		height: 215px;
+		overflow: hidden;
+	}
+	.player .box div {
+		width: 2000px;
+	}
+	.player .box img {
+		float: left;
+		height: 215px;
+	}
+	.player .btns {
+		width: 100%;
+		text-align: center;
+	}
+	.player .btns input {
+		cursor: pointer;
+		padding: 0;
+		width: 10px;
+		height: 10px;
+		border: 0;
+	}
+	.player .btns input.selected {
+		background-color: red;
+	}
+</style>
+<body>
+	<div class="player" id="player">
+		<div class="box">
+			<div>
+				<img src="image/carousel/img1.png" flag="img1">
+				<img src="image/carousel/img2.png" flag="img2">
+				<img src="image/carousel/img3.png" flag="img3">
+			</div>
+		</div>
+		<div class="btns">
+			<input type="button" flag="img1" class="selected">
+			<input type="button" flag="img2">
+			<input type="button" flag="img3">
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="lib/jquery-1.10.1.min.js"></script>
+<script type="text/javascript">
+	$(function(){
+		(function(){
+			var setCurrPlayer = function(flag){
+				if(!flag){
+					return;
+				}
+				var currBtn = $('#player .btns input[flag='+flag+']');
+				currBtn.addClass('selected');
+				currBtn.siblings().removeClass('selected');
+
+				var currImg = $('#player .box img[flag='+flag+']').prevAll();
+				for(var i=currImg.length-1;i>=0;i--){
+					var temImg = $(currImg[i]);
+					if(i==0){
+						temImg.animate({width:'0'},400,function() {
+							temImg.appendTo(temImg.parent());
+							temImg.css('width','auto');
+						});
+					}else{
+						temImg.appendTo(temImg.parent())
+					}
+				}
+			};
+			setInterval(function(){
+				var next = $('#player .btns .selected').next();
+				if(next.length==0){
+					next = $('#player .btns input:first');
+				}
+				setCurrPlayer(next.attr('flag'));
+			},2000);
+			$('#player .btns input').click(function(){
+				setCurrPlayer($(this).attr('flag'));
+			})
+		})();
+	});
+</script>
+</html>
