@@ -3,20 +3,20 @@
 		mouseY = null,
 		canvas = document.getElementById("canvas"),
 		ctx = canvas.getContext("2d"),
-		tk = null,//Ì¹¿Ë
-		tankX = canvas.width*0.4,//Ì¹¿ËµÄx×ø±ê
-		tankY = canvas.height*0.93,  //Ì¹¿ËµÄy×ø±ê
-		tankColor = ["#000000","#696969"],//Ì¹¿ËÑÕÉ«
-		angle = 0;//ÅÚ¸Ë»¡¶È
-		ballArray = [];//½çÃæÉÏµÄÇò
-		bulletArray = [];//×Óµ¯Êý×é
-		level = 1,//µÈ¼¶
-		goal = 20000,//Ä¿±ê·ÖÊý
-		score = 0,//µ±Ç°·ÖÊý
+		tk = null,//坦克
+		tankX = canvas.width*0.4,//坦克位置的起始X值
+		tankY = canvas.height*0.93,  //坦克位置的起始y值
+		tankColor = ["#000000","#696969"],//坦克颜色
+		angle = 0;//坦克炮杆的旋转弧度
+		ballArray = [];//存放页面上的小球
+		bulletArray = [];//存放页面上的子弹
+		level = 1,//游戏等级
+		goal = 20000,//目标分数
+		score = 0,//当前得分
 		getBallTimer = null,
 		runTimer = null,
 		countdownTimer = null,
-		countdown = 60;//µ¹¼ÆÊ±
+		countdown = 60;//倒计时
 		w = window,
 		requestFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
 	var game = (function(){
@@ -36,7 +36,7 @@
 				this.countdown();
 				
 			},
-			//×ÔÊÊÓ¦ÆÁÄ»
+			//游戏页面自适应屏幕
 			adjustCanvas: function(){
 				/*canvas.width = window.innerWidth*0.9;
                 canvas.height = window.innerHeight*0.96;*/
@@ -49,7 +49,7 @@
 				this.adjustCanvas();
 				requestFrame.call(window,this.loop.bind(this));
 			}*/
-			//»ñÈ¡Ëæ»úÑÕÉ«
+			//颜色格式
 			toRGB: function(red,green,blue){
 				rgbR = this.addZero(red.toString(16));
 				rgbG = this.addZero(green.toString(16));
@@ -89,9 +89,9 @@
 		}
 	})();
 	var shape  = {
-		//ÒÆ¶¯ÅÚ¸Ë
+		//移动炮杆
 		moveGun: function(){
-			//»ñÈ¡Êó±êµÄx,yÖµ
+			//炮杆跟随鼠标移动
 			window.onmousemove = function(e){
 				if(e.target.tagName = "CANVAS"){
 					mouseX = e.clientX - e.target.getBoundingClientRect().left;
@@ -100,8 +100,10 @@
 					var moveX = mouseX-tankX-18;  
 					/*if(Math.abs(moveY) < 30 && Math.abs(moveX) < 30) {*/
 						if(moveX >= 0){
+							//炮杆向右转
 							angle = Math.atan(Math.abs(moveX)/Math.abs(moveY));
 						}else{
+							//炮杆向左转
 							angle = -Math.atan(Math.abs(moveX)/Math.abs(moveY));
 						}
 						tk = new tank(tankX,tankY,angle,tankColor);
@@ -119,16 +121,18 @@
 				}
 			}
 		},
-		//»ñµÃÐ¡Çò
+		//获得小球
 		getBall: function(){
 			var bl = new ball(0,200+Math.random()*30,game.toRGB(parseInt(Math.random()*256),parseInt(Math.random()*256),parseInt(Math.random()*256)),15);
 			ballArray.push(bl);
 		},
 		showShape: function(){
 			shape.getBall();
+			//小球隔2s释放一个
 			getBallTimer = setInterval(function(){
 				shape.getBall();
 			},2000);
+			//页面刷新
 			runTimer = setInterval(function () {
                 shape.drawBall();
                 shape.runBall();
@@ -136,13 +140,13 @@
                 shape.drawBullet();
                 shape.runBullet();
                 game.showInfo();
-			},200);
+			},160);
 		},
-		//Ð¡ÇòÔËÐÐ
+		//小球运动
 		runBall: function(){
 			ballArray.forEach(function(){
 				if(this.x < 0 || this.x >= 480 || this.y <= 0 || this.y >= 530){
-					//Ð¡ÇòÍ£Ö¹
+					//小球运动到游戏界面外
 					this.isLive = false;
 					var index = ballArray.indexOf(this);
 					ballArray.splice(index,1);
@@ -150,10 +154,12 @@
 				}else{
 					var rb = this;
 					var flag = true;
+					//遍历页面上所有子弹
 					bulletArray.forEach(function(){
 						var dx = Math.abs(this.x-rb.x);
 						var dy = Math.abs(this.y-rb.y);
 						if(Math.sqrt(Math.pow(dx,2)+Math.pow(dy,2))<rb.radius+this.radius+5){
+							//小球被子弹击中
 							rb.isLive = false;
 							this.isLive = false;
 							var index = bulletArray.indexOf(this);
@@ -164,9 +170,9 @@
 					if(this.isLive){
 						this.x+=this.speed;
 						if(Math.floor(Math.random()*10)%2){
-							this.y+=Math.random()*30;
+							this.y+=Math.random()*15;
 						}else{
-							this.y-=Math.random()*30;
+							this.y-=Math.random()*15;
 						}
 					}else{
 						rb.opacity = 0.5;
@@ -182,7 +188,7 @@
 				}
 			});
 		},
-		//»­Ð¡Çò
+		//画小球
 		drawBall: function(){
 			ctx.clearRect(0,0,canvas.width,530);
 			ballArray.forEach(function(){
@@ -194,11 +200,7 @@
 				ctx.fill();
 			});
 		},
-		//ÏÔÊ¾×Óµ¯
-		showBullet: function(){
-
-		},
-		//»­×Óµ¯
+		//画子弹
 		drawBullet: function(){
 			ctx.clearRect(0,500,canvas.width,canvas.height);
 			bulletArray.forEach(function(){
@@ -212,7 +214,7 @@
 			tk = new tank(tankX,tankY,angle,tankColor);
 			tk.drowTank();
 		},
-		//×Óµ¯ÔËÐÐ
+		//子弹飞行
 		runBullet: function(){
 			bulletArray.forEach(function(){
 				if(this.isLive){
@@ -229,7 +231,7 @@
 			});
 		}
 	};
-	//¶¨ÒåÒ»¸öÌ¹¿Ë¶ÔÏó
+	//定义坦克对象
 	var tank = function(x,y,direct,color){
 		this.x = x;
 		this.y = y;
@@ -240,9 +242,9 @@
 		drowTank: function(){
 			ctx.clearRect(0,500,canvas.width,canvas.height);
 			ctx.fillStyle = this.color[0];
-			ctx.fillRect(this.x,this.y,10,40);//×ó±ßµÄ¾ØÐÎ
-			ctx.fillRect(this.x+25,this.y,10,40);//ÓÒ±ßµÄ¾ØÐÎ
-			ctx.fillRect(this.x+10,this.y+7,25,28);//ÖÐ¼äµÄ¾ØÐÎ
+			ctx.fillRect(this.x,this.y,10,40);//坦克左边矩形
+			ctx.fillRect(this.x+25,this.y,10,40);//坦克右边矩形
+			ctx.fillRect(this.x+10,this.y+7,25,28);//坦克中间矩形
 			ctx.save();
 			ctx.fillStyle = this.color[1];
 			ctx.beginPath();
@@ -250,7 +252,6 @@
 			ctx.closePath();
 			ctx.fill();
 			ctx.restore();
-			//»­³öÅÚÍ²
 			ctx.strokeStyle = this.color[1];
 			ctx.lineWidth = 4;
 			ctx.save();
@@ -266,7 +267,7 @@
 
 		}
 	}
-	//¶¨ÒåÐ¡Çò¶ÔÏó
+	//定义小球对象
 	var ball = function(x,y,color,speed){
 		this.x = x;
 		this.y = y;
@@ -277,7 +278,7 @@
 		this.opacity = 1;
 		this.radius = 10;
 	}
-	//¶¨ÒåÒ»¸ö×Óµ¯¶ÔÏó
+	//定义子弹对象
 	var bullet = function(x,y,direct,speed){
 		this.x = x;
 		this.y = y;
